@@ -1,3 +1,12 @@
+/*
+style.css
+    CSS stylesheet for constellationMap.html
+*/
+
+body {
+    background-color: #acc7d4;
+}
+
 #tooltip {
     position: absolute;
     width: 500px;
@@ -54,4 +63,17 @@ svg.canvas {
     /*-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);*/
     /*-moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);*/
     /*box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);*/
+}
+
+.arc {
+    stroke: #ffffff;
+    fill: #ffffff;
+}
+
+#phen {
+    fill: #847985;
+}
+
+circle {
+    fill: #0a8166;
 }
