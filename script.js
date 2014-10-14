@@ -11,21 +11,40 @@ script.js
 // Initial File Readers (wrapper functions)
 ////////////////////////////////////////////////////////////////////////////////
 
-function startReadNodeFile(event) {
-    // wrapper function, called on initial file load
-    var file = document.getElementById('nodeFile').files[0];
-    if (file) {
-        // alert("Name: " + file.name + "\n" + "Last Modified Date: " + file.lastModifiedDate); 
-        getAsText(file, "node");
+function startPlot(event) {
+    // top level wrapper function, calls functions to read Edges and Nodes
+    var nodeFile = document.getElementById('nodeFile').files[0];
+    var edgeFile = document.getElementById('edgeFile').files[0];
+    
+    if (nodeFile && edgeFile) {
+        startReadNodeFile(nodeFile);
+        startReadEdgeFile(edgeFile);
+    }
+    else {
+        if (!nodeFile){
+            alert("No Node file found. Please load an appropriate file.");
+        }
+        if (!edgeFile){
+            alert("No Edge file found. Please load an appropriate file.");
+        }
     }
 }
 
-function startReadEdgeFile(event) {
+function startReadNodeFile(nodeFile) {
     // wrapper function, called on initial file load
-    var file = document.getElementById('edgeFile').files[0];
-    if (file) {
+    //var file = document.getElementById('nodeFile').files[0];
+    if (nodeFile) {
         // alert("Name: " + file.name + "\n" + "Last Modified Date: " + file.lastModifiedDate); 
-        getAsText(file, "edge");
+        getAsText(nodeFile, "node");
+    }
+}
+
+function startReadEdgeFile(edgeFile) {
+    // wrapper function, called on initial file load
+    //var file = document.getElementById('edgeFile').files[0];
+    if (edgeFile) {
+        // alert("Name: " + file.name + "\n" + "Last Modified Date: " + file.lastModifiedDate); 
+        getAsText(edgeFile, "edge");
     }
 }
 
@@ -46,7 +65,7 @@ function getAsText(readFile, fileType) {
 ////////////////////////////////////////////////////////////////////////////////
 
 function nodeLoaded(event) {
-    alert("File Loaded Successfully");
+//    alert("File Loaded Successfully");
     var lines = this.result.split('\n');
 
     var nodes = parseNodes(lines);
@@ -218,7 +237,7 @@ function plotNodes(nodes) {
 ////////////////////////////////////////////////////////////////////////////////	
 
 function edgeLoaded(event) {
-    alert("File Loaded Successfully");
+    //alert("File Loaded Successfully");
     var lines = this.result.split('\n');
 
     var edges = parseEdges(lines);
@@ -240,7 +259,6 @@ function parseEdges(lines) {
             for(var i = 0; i < numOfEdges; i++) {
                 line++;
                 data = lines[line].split("\t");
-                console.log(data);
                 edges[i] = {"Name":"edges" + i};
                 edges[i].Start = data[0]
                 edges[i].X1 = data[1];

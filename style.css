@@ -31,6 +31,16 @@ body {
     line-height: 20px;
 }
 
+#uploads {
+    font-family: 'Rajdhani', sans-serif;
+    color: #ffffff;
+}
+
+#uploads input {
+    font-family: inherit;
+    font-size: 12px;
+}
+
 #genelists {
     position: absolute;
     width: 500px;
