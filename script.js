@@ -1,15 +1,50 @@
 /*
 script.js
-Requires:
-    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+    javascript functions for constellationMap.html
+    
+    Requires:
+        <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
 */
 
-function startReadNodeFile(event) {
-    var file = document.getElementById('nodeFile').files[0];
-    if (file) {
+////////////////////////////////////////////////////////////////////////////////
+// Initial File Readers (wrapper functions)
+////////////////////////////////////////////////////////////////////////////////
+
+function startPlot(event) {
+    // top level wrapper function, calls functions to read Edges and Nodes
+    var nodeFile = document.getElementById('nodeFile').files[0];
+    var edgeFile = document.getElementById('edgeFile').files[0];
+    
+    if (nodeFile && edgeFile) {
+        startReadNodeFile(nodeFile);
+        startReadEdgeFile(edgeFile);
+    }
+    else {
+        if (!nodeFile){
+            alert("No Node file found. Please load an appropriate file.");
+        }
+        if (!edgeFile){
+            alert("No Edge file found. Please load an appropriate file.");
+        }
+    }
+}
+
+function startReadNodeFile(nodeFile) {
+    // wrapper function, called on initial file load
+    //var file = document.getElementById('nodeFile').files[0];
+    if (nodeFile) {
         // alert("Name: " + file.name + "\n" + "Last Modified Date: " + file.lastModifiedDate); 
-        getAsText(file, "node");
+        getAsText(nodeFile, "node");
+    }
+}
+
+function startReadEdgeFile(edgeFile) {
+    // wrapper function, called on initial file load
+    //var file = document.getElementById('edgeFile').files[0];
+    if (edgeFile) {
+        // alert("Name: " + file.name + "\n" + "Last Modified Date: " + file.lastModifiedDate); 
+        getAsText(edgeFile, "edge");
     }
 }
 
@@ -23,6 +58,18 @@ function getAsText(readFile, fileType) {
         reader.onload = edgeLoaded;
     }
 
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Functions for parsing nodes.odf and plotting node data
+////////////////////////////////////////////////////////////////////////////////
+
+function nodeLoaded(event) {
+//    alert("File Loaded Successfully");
+    var lines = this.result.split('\n');
+
+    var nodes = parseNodes(lines);
+    plotNodes(nodes);
 }
 
 function parseNodes(lines) {
@@ -45,10 +92,9 @@ function parseNodes(lines) {
             geneSets = geneSets.split('\t');
             numOfGs = geneSets.length;
             for(var i = 1; i <= numOfGs; i++) {
-                var jo = { "Name":geneSets[i] };
+                var jo = { "Name":geneSets[i-1] };
                 nodes[i] = jo;
             }
-
 
             for(var i = 1; i <= numOfGs; i++) {
                 line++;
@@ -64,6 +110,7 @@ function parseNodes(lines) {
             for(var i = 1; i <= numOfGs; i++) {
                 line++;
                 data = lines[line].split("\t");
+//                nodes[i].Name = data[0];
                 nodes[i].X = data[1];
                 nodes[i].Y = data[2];
                 nodes[i].Size = data[3];
@@ -79,6 +126,8 @@ function plotNodes(nodes) {
     var radius = 8;
     var selectedRadius = 10;   //the radius when mouse over
     var align = 10;
+    //var phenColor = "#847985";
+    //var nodeColor = "#0a8166";
     // var legendWidth = 100;
     xScale.domain([d3.min(nodes, function(d) {return parseFloat(d.X);}),
                                     d3.max(nodes, function(d) {return parseFloat(d.X) ;})]);
@@ -89,6 +138,38 @@ function plotNodes(nodes) {
                                     d3.max(nodes, function(d) {return parseFloat(d.Y) ;})]);
     yScale.range([ padding, h - padding]);  
 
+    // Plot concentric circle grid
+    var arc1 = d3.svg.arc()
+        .innerRadius(50)
+        .outerRadius(52)
+        .startAngle(0 * (Math.PI/180)) //converting from degs to radians
+        .endAngle(360 * (Math.PI/180)) //just radians
+
+    var arc2 = d3.svg.arc()
+        .innerRadius(150)
+        .outerRadius(152)
+        .startAngle(0 * (Math.PI/180)) //converting from degs to radians
+        .endAngle(360 * (Math.PI/180)) //just radians
+    var arc3 = d3.svg.arc()
+        .innerRadius(250)
+        .outerRadius(252)
+        .startAngle(0 * (Math.PI/180)) //converting from degs to radians
+        .endAngle(360 * (Math.PI/180)) //just radians
+
+    svg.append("path")
+        .attr("d", arc1)
+        .attr("transform", "translate("+xScale(0) + "," + yScale(0) +")")
+        .attr("class", "arc");
+    svg.append("path")
+        .attr("d", arc2)
+        .attr("transform", "translate("+xScale(0) + "," + yScale(0) +")")
+        .attr("class", "arc");
+    svg.append("path")
+        .attr("d", arc3)
+        .attr("transform", "translate("+xScale(0) + "," + yScale(0) +")")
+        .attr("class", "arc");
+    
+    // plot nodes
     svg.selectAll("circle")
         .data(nodes)
         .enter()
@@ -100,11 +181,16 @@ function plotNodes(nodes) {
             return yScale(d.Y);
         })
         .attr("r", radius)
-        .attr("fill", function(d, i) {
+        /*.attr("fill", function(d, i) {
             if (i == 0) {
-                return "red";
+                return phenColor;
             } else {
-                return "blue";
+                return nodeColor;
+            }
+        })*/
+        .attr("id", function(d, i) {
+            if (i == 0) {
+                return "phen";
             }
         })
         .on("mouseover", function(d) {
@@ -114,6 +200,7 @@ function plotNodes(nodes) {
             var yPosition = parseFloat(d3.select(this).attr("cy")) + align + yOffset;
 
             d3.select(this).attr("r", selectedRadius);
+            d3.select(this).classed("selectedNode", true);
 
             d3.select("#tooltip")
                 .style("left", xPosition + "px")
@@ -137,53 +224,24 @@ function plotNodes(nodes) {
         })
         .on("mouseout", function(d) {
             d3.select(this).attr("r", radius);
+            d3.select(this).classed("selectedNode", false);
             d3.select("#tooltip").select("svg").remove();
             d3.select("#tooltip").classed("hidden", true);
         });
 
-        var arc1 = d3.svg.arc()
-            .innerRadius(50)
-            .outerRadius(52)
-            .startAngle(0 * (Math.PI/180)) //converting from degs to radians
-            .endAngle(360 * (Math.PI/180)) //just radians
 
-        var arc2 = d3.svg.arc()
-            .innerRadius(150)
-            .outerRadius(152)
-            .startAngle(0 * (Math.PI/180)) //converting from degs to radians
-            .endAngle(360 * (Math.PI/180)) //just radians
-        var arc3 = d3.svg.arc()
-            .innerRadius(250)
-            .outerRadius(252)
-            .startAngle(0 * (Math.PI/180)) //converting from degs to radians
-            .endAngle(360 * (Math.PI/180)) //just radians
-
-        svg.append("path")
-            .attr("d", arc1)
-            .attr("transform", "translate("+xScale(0) + "," + yScale(0) +")");
-        svg.append("path")
-            .attr("d", arc2)
-            .attr("transform", "translate("+xScale(0) + "," + yScale(0) +")");
-        svg.append("path")
-            .attr("d", arc3)
-            .attr("transform", "translate("+xScale(0) + "," + yScale(0) +")");
 }
 
-function nodeLoaded(event) {
-    alert("File Loaded Successfully");
+////////////////////////////////////////////////////////////////////////////////
+// Functions for parsing edges.odf and plotting dge data
+////////////////////////////////////////////////////////////////////////////////	
+
+function edgeLoaded(event) {
+    //alert("File Loaded Successfully");
     var lines = this.result.split('\n');
 
-    var nodes = parseNodes(lines);
-    plotNodes(nodes);
-}	
-
-
-function startReadEdgeFile(event) {
-    var file = document.getElementById('edgeFile').files[0];
-    if (file) {
-        // alert("Name: " + file.name + "\n" + "Last Modified Date: " + file.lastModifiedDate); 
-        getAsText(file, "edge");
-    }
+    var edges = parseEdges(lines);
+    plotEdges(edges);
 }
 
 function parseEdges(lines) {
@@ -201,7 +259,6 @@ function parseEdges(lines) {
             for(var i = 0; i < numOfEdges; i++) {
                 line++;
                 data = lines[line].split("\t");
-                console.log(data);
                 edges[i] = {"Name":"edges" + i};
                 edges[i].Start = data[0]
                 edges[i].X1 = data[1];
@@ -217,7 +274,9 @@ function parseEdges(lines) {
 }
 
 function plotEdges(edges) {
-
+    var edgeColor = "#334f6d";
+    var selectedEdgeColor = "red";
+    
     // find the thickness factor
     var jmin = d3.min(edges, function(d){
         return parseFloat(d.jaccard);
@@ -234,22 +293,15 @@ function plotEdges(edges) {
         .attr("y1", function(d) { return yScale(d.Y1); })
         .attr("x2", function(d) { return xScale(d.X2); })
         .attr("y2", function(d) { return yScale(d.Y2); })
-        .attr("stroke", "green")
+        .attr("stroke", edgeColor)
         .attr("stroke-width", function(d) { return (d.jaccard - jmin)*5 / (jmax - jmin) + 1;  } )
         .on("mouseover", function(d) {
-            d3.select(this).attr("stroke", "red");
+            d3.select(this).attr("stroke", selectedEdgeColor);
             d3.select("#genelists").classed("hidden", false);
         })
         .on("mouseout", function(d) {
-            d3.select(this).attr("stroke", "green");
+            d3.select(this).attr("stroke", edgeColor);
             d3.select("#genelists").classed("hidden", true);
         });
 }
 
-function edgeLoaded(event) {
-    alert("File Loaded Successfully");
-    var lines = this.result.split('\n');
-
-    var edges = parseEdges(lines);
-    plotEdges(edges);
-}

@@ -3,11 +3,12 @@
 
 <head>
 	<title>Constellation Map</title>
-
-    <link rel="stylesheet" type="text/css" href="style.css">
+    
+    <link href='http://fonts.googleapis.com/css?family=Rajdhani' rel='stylesheet' type='text/css'>
 	<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
     <script type="text/javascript" src="script.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
 
 </head>
 
@@ -24,12 +25,14 @@
 	    <p><strong>gene3: </strong><span id="url">100</span></p>
     </div>
 
-	<div id="upload.div">
+	<div id="uploads">
         <h1>upload node file</h1>
-        <input type="file" id="nodeFile" onchange="startReadNodeFile()"  name="files[]" multiple />
+        <input type="file" id="nodeFile" name="files[]" multiple />
 
         <h1>upload edge file</h1>
-        <input type="file" id="edgeFile" onchange="startReadEdgeFile()"  name="files[]" multiple />
+        <input type="file" id="edgeFile" name="files[]" multiple />
+        
+        <button type="button" onclick="startPlot()">Plot</button>
 	</div>
 
 	<script language="javascript" type="text/javascript">
