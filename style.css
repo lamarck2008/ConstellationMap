@@ -3,13 +3,59 @@ style.css
     CSS stylesheet for constellationMap.html
 */
 
+html, body {
+    margin: 0;
+    padding:0;
+    height:100%;
+    border: none;
+}
+
 body {
     background-color: #acc7d4;
 }
 
+a:link {
+    color: #a47985;
+}
+a:visited {
+    color: #847985
+}
+
+
+#menuContainer {
+    margin: 0;
+    right: -285px;
+    height: 100%;
+    width: 320px;
+    padding: 0;
+    position: fixed;
+}
+#menu {
+    margin: 0;
+    background: white;
+    height: 100%;
+    width: 285px;
+    padding: 0;
+    position: absolute;
+    right: 0;
+    /*margin-top: -5px;*/
+}
+#menuContainer img {
+    margin: 0;
+    padding: 5px 0px 5px 0px;
+    height: 30px;
+    width: 30px;
+    position: absolute;
+    left: 0;
+    cursor: pointer;
+}
+#menuContainer #menuBtnOff {
+    opacity: 0;
+}
+
 #tooltip {
     position: absolute;
-    width: 500px;
+    width: 350px;
     height: auto;
     padding: 10px;
     background-color: white;
@@ -21,10 +67,57 @@ body {
     box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
     pointer-events: none;
 }
-#tooltip.hidden {
-    display: none;
-}
 #tooltip p {
+    margin: 0;
+    font-family: sans-serif;
+    font-size: 12px;
+    line-height: 20px;
+    width: inherit;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+#phenTooltip {
+    position: absolute;
+    width: 350px;
+    height: auto;
+    padding: 10px;
+    background-color: white;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+}
+#phenTooltip p {
+    margin: 0;
+    font-family: sans-serif;
+    font-size: 12px;
+    line-height: 20px;
+    width: inherit;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+#genelists {
+    position: absolute;
+    width: 350px;
+    height: auto;
+    padding: 10px;
+    background-color: white;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+}
+#genelists p {
     margin: 0;
     font-family: sans-serif;
     font-size: 12px;
@@ -34,35 +127,18 @@ body {
 #uploads {
     font-family: 'Rajdhani', sans-serif;
     color: #ffffff;
+    width: 285px;
+    margin: 0;
 }
-
 #uploads input {
     font-family: inherit;
     font-size: 12px;
+    padding: 0px 0px 0px 15px
 }
 
-#genelists {
-    position: absolute;
-    width: 500px;
-    height: auto;
-    padding: 10px;
-    background-color: white;
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
-    border-radius: 10px;
-    -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-    -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-    pointer-events: none;
-}
-#genelists.hidden {
-    display: none;
-}
-#genelists p {
+#uploads h1 {
     margin: 0;
-    font-family: sans-serif;
-    font-size: 12px;
-    line-height: 20px;
+    padding: 0px 0px 5px 15px;
 }
 
 svg.canvas {
@@ -80,10 +156,60 @@ svg.canvas {
     fill: #ffffff;
 }
 
-#phen {
+.phen {
     fill: #847985;
 }
 
-circle {
+.hidden {
+    display: none;
+}
+
+.geneset {
     fill: #0a8166;
+}
+
+ul {
+    list-style-type: none;
+}
+.panel > ul {
+    font-family: 'Rajdhani', sans-serif;
+    color: #acc7d4;
+    width: auto;
+    padding-left: 0;
+    margin-left: 40px;
+    margin-right: 10px;
+}
+.infoTitle span {
+    font-size: 45px;
+    font-weight: 600;
+}
+.xScroll {
+    overflow-x: auto;
+}
+.infoText {
+    font-size: 18px;
+    margin: 0;
+    padding: 0;
+    width: auto;
+}
+.infoSubject {
+    font-size: 25px;
+    font-weight: 500px;
+    width: auto;
+}
+.infoSubject span {
+    margin: 0;
+    padding: 0;
+}
+
+#ulGenes {
+    margin: 0;
+    padding: 0;
+    font-size: 18px;
+    height: 400px;
+    width: auto;
+    border-style: solid;
+    border-width: 2px;
+    border-color: #334f6d;
+    overflow-y: auto;
 }

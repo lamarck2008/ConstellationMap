@@ -13,12 +13,48 @@
 </head>
 
 <body>
-	<div id="tooltip" class="hidden">
+    
+    <div id="menuContainer">
+        <div id="menu">
+            <div id="nodeInfo" class="panel hidden">
+                <ul>
+                    <li class="infoTitle"><span>Gene Set</span></li>
+                    <li id="textTitle" class="xScroll infoText"><span>100</span></li>
+                    <li id="textURL" class="infoSubject"><a>MSigDB Card</a></li>
+                    <li class="infoSubject"><span>Coordinates</span></li>
+                    <li id="textX" class="infoText"><span>100</span></li>
+                    <li id="textY" class="infoText"><span>100</span></li>
+                    <li id="MemberGenes" class="infoSubject"><span>Member Genes</span></li>
+                    <li class="infoGenes">
+                        <ul id="ulGenes">
+
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div id="edgeInfo" class="panel hidden"></div>
+        </div>
+        <img src="menu_on.png" id="menuBtnOn">
+        <img src="menu_off.png" id="menuBtnOff" class="hidden">
+    </div>
+    <script language="javascript" type="text/javascript">
+        var menuSet = 0;
+        menuTabOn();
+        menuTabOff();
+    </script>
+    
+    
+    <div id="tooltip" class="hidden">
 	    <p><strong>Gene Set Name: </strong><span id="name">100</span></p>
-	    <p><strong>Gene Size: </strong><span id="size">100</span></p>
+	    <p><strong>Number of Genes: </strong><span id="size">100</span></p>
 	    <p><strong>MsigDB URL: </strong><span id="url">100</span></p>
     </div>
 
+    <div id="phenTooltip" class="hidden">
+	    <p><strong>Phenotype: </strong><span id="phenotype">100</span></p>
+        <p><strong>Direction: </strong><span id="direction">100</span></p>
+    </div>
+    
 	<div id="genelists" class="hidden">
 	    <p><strong>gene1: </strong><span id="name">100</span></p>
 	    <p><strong>gene2: </strong><span id="size">100</span></p>
@@ -37,19 +73,21 @@
 
 	<script language="javascript" type="text/javascript">
 
-		var w = 600;
-		var h = 600;
-        var svg = d3.select("body")
-                    .append("svg")
-                    .attr("class", "canvas")
-                    .style("align", "center")
-                    .attr("width", w)
-                    .attr("height", h); 
+		var w = 600,
+            h = 600,
+            svgObj,
+            xScale = d3.scale.linear(),
+            yScale = d3.scale.linear();
+        
+        svgObj = d3.select("body")
+                .append("svg")
+                .attr("class", "canvas")
+                .style("align", "center")
+                .attr("width", w)
+                .attr("height", h);
 
-		var xScale = d3.scale.linear();
-		var yScale = d3.scale.linear();
 	</script>
-
+    
 </body>
 
 </html>
