@@ -347,7 +347,8 @@ function plotNodes(nodes, nodesMeta) {
         .on("click", function (d, i) {
             var panelObj,
                 GeneSetName,
-                k;
+                k,
+                dataObj;
         
             if (menuSet === 0) {
                 menuOn();
@@ -375,30 +376,30 @@ function plotNodes(nodes, nodesMeta) {
                         .append("li")
                         .text(d.MemberGenes[k]);
                 }
-                var dataObj = d;
+                dataObj = d;
 
                 panelObj.select("#msigdbannotation")
-                        .on("click", function() {
-                            var url = "http://www.broadinstitute.org/gsea/msigdb/annotate.jsp?geneList="
-                            for (k = 0; k < dataObj.MemberGenes.length; k += 1) {
-                                url += dataObj.MemberGenes[k]
-                                url += ","
-                            }
-                            window.open(url);
-                        })
+                    .on("click", function () {
+                        var url = "http://www.broadinstitute.org/gsea/msigdb/annotate.jsp?geneList=";
+                        for (k = 0; k < dataObj.MemberGenes.length; k += 1) {
+                            url += dataObj.MemberGenes[k];
+                            url += ",";
+                        }
+                        window.open(url);
+                    });
 
                 panelObj.select("#davidannotation")
-                        .on("click", function() {
-                            // currently assume that the ids are gene symbols, need change to the real encoding later
-                            var url = "http://david.abcc.ncifcrf.gov/api.jsp?type=OFFICIAL_GENE_SYMBOL&ids="
-                            for (k = 0; k < dataObj.MemberGenes.length; k += 1) {
-                                url += dataObj.MemberGenes[k]
-                                url += ","
-                            }
-                            // hard code the tool as summary
-                            url += "&tool=summary"
-                            window.open(url);
-                        })
+                    .on("click", function () {
+                        // currently assume that the ids are gene symbols, need change to the real encoding later
+                        var url = "http://david.abcc.ncifcrf.gov/api.jsp?type=OFFICIAL_GENE_SYMBOL&ids=";
+                        for (k = 0; k < dataObj.MemberGenes.length; k += 1) {
+                            url += dataObj.MemberGenes[k];
+                            url += ",";
+                        }
+                        // hard code the tool as summary
+                        url += "&tool=summary";
+                        window.open(url);
+                    });
             }
         });
 
@@ -557,7 +558,9 @@ function startPlot(event) {
 }
 
 function davidAnnotation(event) {
-    var panelObj = d3.select("#nodeInfo");
-    var data = panelObj.select("#davidannotation").enter()
+    "use strict";
+    
+    var panelObj = d3.select("#nodeInfo"),
+        data = panelObj.select("#davidannotation").enter();
     // window.location.href = "http://";
 }
