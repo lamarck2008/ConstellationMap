@@ -25,8 +25,8 @@
                     <li id="textX" class="infoText"><span>100</span></li>
                     <li id="textY" class="infoText"><span>100</span></li>
                     <li id="MemberGenes" class="infoSubject"><span>Member Genes</span></li>
-                    <li class="infoGenes">
-                        <ul id="ulGenes">
+                    <li>
+                        <ul id="nodeGenes" class="infoGenes">
 
                         </ul>
                     </li>
@@ -36,20 +36,32 @@
                     <button type="button" id="davidannotation">DAVID Annotation</button>
                 </ul>
             </div>
-            <div id="edgeInfo" class="panel hidden"></div>
+        
+            <div id="edgeInfo" class="panel hidden">
+                <ul>
+                    <li class="infoTitle"><span>GS Pair</span></li>
+                    <li id="textTitle1" class="xScroll infoText"><span>100</span></li>
+                    <li id="textTitle2" class="xScroll infoText"><span>100</span></li>
+                    <li id="Jaccard" class="infoSubject"><span>Jaccard</span></li>
+                    <li id="Common Genes" class="infoSubject"><span>Common Genes</span></li>
+                    <li>
+                        <ul id="commonGenes" class="infoGenes">
+
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
         <img src="menu_on.png" id="menuBtnOn">
         <img src="menu_off.png" id="menuBtnOff" class="hidden">
     </div>
-    <script language="javascript" type="text/javascript">
-        var menuSet = 0;
-        menuTabOn();
-        menuTabOff();
-    </script>
+    <!--<script language="javascript" type="text/javascript">
+
+    </script>-->
     
     
     <div id="tooltip" class="hidden">
-	    <p><strong>Gene Set Name: </strong><span id="name">100</span></p>
+	    <p><strong>Gene Set: </strong><span id="name">100</span></p>
 	    <p><strong>Number of Genes: </strong><span id="size">100</span></p>
 	    <p><strong>MsigDB URL: </strong><span id="url">100</span></p>
     </div>
@@ -60,9 +72,12 @@
     </div>
     
 	<div id="genelists" class="hidden">
-	    <p><strong>gene1: </strong><span id="name">100</span></p>
-	    <p><strong>gene2: </strong><span id="size">100</span></p>
-	    <p><strong>gene3: </strong><span id="url">100</span></p>
+	    <p><strong>Gene Set A: </strong><span id="name1">100</span></p>
+	    <p><strong>Gene Set B: </strong><span id="name2">100</span></p>
+	    <p><strong>Common Genes: </strong></p>
+        <ul id="edgeGenes">
+            
+        </ul>
     </div>
 
 	<div id="uploads">
@@ -74,22 +89,28 @@
         
         <button type="button" onclick="startPlot()">Plot</button>
 	</div>
+    
+    <div id="svgContainer"></div>
 
 	<script language="javascript" type="text/javascript">
 
 		var w = 600,
             h = 600,
             svgObj,
+            menuSet,
             xScale = d3.scale.linear(),
             yScale = d3.scale.linear();
         
-        svgObj = d3.select("body")
+        svgObj = d3.select("#svgContainer")
                 .append("svg")
                 .attr("class", "canvas")
                 .style("align", "center")
                 .attr("width", w)
                 .attr("height", h);
-
+        
+        menuSet = 0;
+        menuTabOn();
+        menuTabOff();
 	</script>
     
 </body>

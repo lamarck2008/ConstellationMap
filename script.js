@@ -8,7 +8,7 @@ script.js
 */
 
 /*jslint browser: true, devel: true*/
-/*global d3, xScale, yScale, svgObj, w, h, FileReader, menuSet: true*/
+/*global d3, xScale, yScale, svgObj, w, h, FileReader, menuSet: true, $*/
 
 ////////////////////////////////////////////////////////////////////////////////
 // Functions for sliding menu with button
@@ -62,7 +62,7 @@ function menuOff(event) {
 
 function menuTabOn(event) {
     "use strict";
-    
+
     d3.select("#menuBtnOn")
         .on("click", function (d) {
             menuOn();
@@ -76,6 +76,8 @@ function menuTabOff(event) {
     
     d3.select("#menuBtnOff")
         .on("click", function (d) {
+            svgObj.selectAll("circle").classed("selectedNode", false);
+            svgObj.selectAll("line").classed("selectedEdge", false);
             menuOff();
         });
     
@@ -83,58 +85,72 @@ function menuTabOff(event) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Function for parsing nodes.odf
+// Transitions / animations
 ////////////////////////////////////////////////////////////////////////////////
 
-/*function parseNodes(lines) {
-    var headerLine = 'HeaderLines';
-    var dataLine = 'DataLines';
-    var gsNames = "Gene Set Names:";
-    var nodes = [];
-    var numOfGs = 0;
-
-    nodes[0] = { "Name":"Phenotype" };
-    nodes[0].X = 0;
-    nodes[0].Y = 0;
-    nodes[0].Size = "NA";
-    nodes[0].URL = "NA";
-
-    for(var line = 0; line < lines.length; line++) {
-        var data = lines[line];
-        if (data.substring(0, gsNames.length) == gsNames) {
-            var geneSets = data.split(':')[1];
-            geneSets = geneSets.split('\t');
-            numOfGs = geneSets.length;
-            for(var i = 1; i <= numOfGs; i++) {
-                var jo = { "Name":geneSets[i-1] };
-                nodes[i] = jo;
-            }
-
-            for(var i = 1; i <= numOfGs; i++) {
-                line++;
-                var data = lines[line];
-                data = data.split(":")[1];
-                var genes = data.split("\t");
-                nodes[i].genes = genes;
-            }
-        }
-
-        if (data.substring(0, dataLine.length) == dataLine) {
-
-            for(var i = 1; i <= numOfGs; i++) {
-                line++;
-                data = lines[line].split("\t");
-//                nodes[i].Name = data[0];
-                nodes[i].X = data[1];
-                nodes[i].Y = data[2];
-                nodes[i].Size = data[3];
-                nodes[i].URL = data[4];
-            }
-        }
+function selectedNodeTrans(nodeObj) {
+    "use strict";
+    var nodeClass = nodeObj.attr("class");
+    if (nodeClass === "selectedNode") {
+        nodeObj.transition()
+            .duration(800)
+            //.attr("class", "selectedNode")
+            .style("fill", "#d65667")
+            .each("end", function () {
+                nodeObj.transition()
+                    .duration(400)
+                    //.attr("class", "geneset")
+                    .style("fill", "#0a8166")
+                    .each("end", function () { selectedNodeTrans(nodeObj); });
+            });
     }
-    return nodes;
-}*/
+}
 
+function selectedEdgeTrans(edgeObj) {
+    "use strict";
+    var edgeClass = edgeObj.attr("class");
+    if (edgeClass === "selectedEdge") {
+        edgeObj.transition()
+            .duration(800)
+            //.attr("class", "selectedNode")
+            .style("stroke", "#d65667")
+            .each("end", function () {
+                edgeObj.transition()
+                    .duration(400)
+                    //.attr("class", "geneset")
+                    .style("stroke", "#334f6d")
+                    .each("end", function () { selectedEdgeTrans(edgeObj); });
+            });
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Auxilliary functions
+////////////////////////////////////////////////////////////////////////////////
+
+function intersect(array1, array2) {
+    "use strict";
+    
+    var outArray = array1.filter(function (n) {
+        return array2.indexOf(n) !== -1;
+    });
+    
+    return (outArray);
+}
+
+function unique(array1, array2) {
+    "use strict";
+    
+    var outArray = array1.filter(function (n) {
+        return array2.indexOf(n) === -1;
+    });
+    
+    return (outArray);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Function for parsing nodes.odf
+////////////////////////////////////////////////////////////////////////////////
 
 function parseODF(lines) {
     "use strict";
@@ -258,15 +274,15 @@ function plotNodes(nodes, nodesMeta) {
     
     svgObj.append("path")
         .attr("d", arc1)
-        .attr("transform", "translate(" + xScale(0) + "," + yScale(0) + ")")
+        .attr("transform", "translate(" + xScale(0) + "," + (h - yScale(0)) + ")")
         .attr("class", "arc");
     svgObj.append("path")
         .attr("d", arc2)
-        .attr("transform", "translate(" + xScale(0) + "," + yScale(0) + ")")
+        .attr("transform", "translate(" + xScale(0) + "," + (h - yScale(0)) + ")")
         .attr("class", "arc");
     svgObj.append("path")
         .attr("d", arc3)
-        .attr("transform", "translate(" + xScale(0) + "," + yScale(0) + ")")
+        .attr("transform", "translate(" + xScale(0) + "," + (h - yScale(0)) + ")")
         .attr("class", "arc");
     
     // plot nodes
@@ -278,7 +294,7 @@ function plotNodes(nodes, nodesMeta) {
             return xScale(d.x);
         })
         .attr("cy", function (d) {
-            return yScale(d.y);
+            return h - yScale(d.y);
         })
         .attr("r", radius)
         .attr("class", function (d, i) {
@@ -289,13 +305,15 @@ function plotNodes(nodes, nodesMeta) {
             }
         })
         .on("mouseover", function (d, i) {
-            var xOffset = (window.innerWidth - w) / 2,
-                yOffset = (window.innerHeight - h) / 2,
+            //var xOffset = (window.innerWidth - w) / 2,
+            //    yOffset = (window.innerHeight - h) / 2,
+            var xOffset = parseInt($("svg.canvas").css("margin-left"), 10),
+                yOffset = document.getElementById("svgContainer").getBoundingClientRect().top,
                 xPosition = parseFloat(d3.select(this).attr("cx")) + align + xOffset,
                 yPosition = parseFloat(d3.select(this).attr("cy")) + align + yOffset;
 
             d3.select(this).attr("r", selectedRadius);
-            d3.select(this).classed("selectedNode", true);
+            //d3.select(this).classed("selectedNode", true);
             
             if (i === nodelen) {
                 d3.select("#phenTooltip")
@@ -335,7 +353,7 @@ function plotNodes(nodes, nodesMeta) {
         })
         .on("mouseout", function (d, i) {
             d3.select(this).attr("r", radius);
-            d3.select(this).classed("selectedNode", false);
+            //d3.select(this).classed("selectedNode", false);
             if (i === nodelen) {
                 d3.select("#phenTooltip").select("svg").remove();
                 d3.select("#phenTooltip").classed("hidden", true);
@@ -348,12 +366,24 @@ function plotNodes(nodes, nodesMeta) {
             var panelObj,
                 GeneSetName,
                 k,
+                clickedNode,
                 dataObj;
-        
+            
+            // Show menu
             if (menuSet === 0) {
                 menuOn();
             }
+            
             if (i !== nodelen) {
+                // Animate node
+                svgObj.selectAll("circle").classed("selectedNode", false);
+                svgObj.selectAll("line").classed("selectedEdge", false);
+                clickedNode = d3.select(this);
+                clickedNode.attr("class", "selectedNode");
+                selectedNodeTrans(clickedNode);
+                
+                // Populate menu with metadata
+                d3.select("#edgeInfo").classed("hidden", true);
                 GeneSetName = d["Gene.Set.Name"];
                 panelObj = d3.select("#nodeInfo");
                 panelObj.classed("hidden", false);
@@ -370,12 +400,13 @@ function plotNodes(nodes, nodesMeta) {
                 panelObj.select("#textY").select("span")
                     .text("Y: " + d.y);
                 
-                panelObj.select("#ulGenes").selectAll("li").remove();
+                panelObj.select("#nodeGenes").selectAll("li").remove();
                 for (k = 0; k < d.MemberGenes.length; k += 1) {
-                    panelObj.select("#ulGenes")
+                    panelObj.select("#nodeGenes")
                         .append("li")
                         .text(d.MemberGenes[k]);
                 }
+                
                 dataObj = d;
 
                 panelObj.select("#msigdbannotation")
@@ -402,7 +433,6 @@ function plotNodes(nodes, nodesMeta) {
                     });
             }
         });
-
 }
 
 function nodeLoaded(event) {
@@ -418,7 +448,7 @@ function nodeLoaded(event) {
 // Functions for parsing edges.odf and plotting dge data
 ////////////////////////////////////////////////////////////////////////////////	
 
-function parseEdges(lines) {
+/*function parseEdges(lines) {
     "use strict";
     
     var headerLine = 'HeaderLines',
@@ -450,41 +480,133 @@ function parseEdges(lines) {
         }
     }
     return edges;
-}
+}*/
 
-function plotEdges(edges) {
+function plotEdges(edges, edgesMeta) {
     "use strict";
     
     var edgeColor = "#334f6d",
-        selectedEdgeColor = "red",
+        selectedEdgeColor = "#d65667",
         jmin,
-        jmax;
+        jmax,
+        j,
+        gsNames,
+        gs1,
+        gs2;
     
     // find the thickness factor
     jmin = d3.min(edges, function (d) {
-        return parseFloat(d.jaccard);
+        return d.Jaccard;
     });
     jmax = d3.max(edges, function (d) {
-        return parseFloat(d.jaccard);
+        return d.Jaccard;
     });
+    
+    // Add gene set names and common member genes
+    for (j = 0; j < edges.length; j += 1) {
+        gsNames = edgesMeta["Gene Set Names"];
+        gs1 = gsNames[edges[j].Index1 - 1];
+        gs2 = gsNames[edges[j].Index2 - 1];
+        edges[j].gs1 = gs1;
+        edges[j].gs2 = gs2;
+        
+        edges[j].gs1Members = edgesMeta[gs1];
+        edges[j].gs2Members = edgesMeta[gs2];
+        edges[j].gsIntersect = intersect(edges[j].gs1Members, edges[j].gs2Members);
+        
+        edges[j].gs1Unique = unique(edges[j].gs1Members, edges[j].gs2Members);
+        edges[j].gs2Unique = unique(edges[j].gs2Members, edges[j].gs1Members);
+    }
     
     svgObj.selectAll("line")
         .data(edges)
         .enter()
         .append("line")
-        .attr("x1", function (d) { return xScale(d.X1); })
-        .attr("y1", function (d) { return yScale(d.Y1); })
-        .attr("x2", function (d) { return xScale(d.X2); })
-        .attr("y2", function (d) { return yScale(d.Y2); })
+        .attr("x1", function (d) { return xScale(d.x1); })
+        .attr("y1", function (d) { return h - yScale(d.y1); })
+        .attr("x2", function (d) { return xScale(d.x2); })
+        .attr("y2", function (d) { return h - yScale(d.y2); })
         .attr("stroke", edgeColor)
-        .attr("stroke-width", function (d) { return (d.jaccard - jmin) * 5 / (jmax - jmin) + 1;  })
+        .attr("stroke-width", function (d) { return (d.Jaccard - jmin) * 5 / (jmax - jmin) + 1;  })
         .on("mouseover", function (d) {
+            var xPosition = parseInt($("svg.canvas").css("margin-left"), 10) + w,
+                yPosition = document.getElementById("svgContainer").getBoundingClientRect().top,
+                genelistObj = d3.select("#genelists"),
+                k,
+                kmax;
+            
             d3.select(this).attr("stroke", selectedEdgeColor);
+        
+            genelistObj.style("left", xPosition + "px")
+                .style("top", yPosition + "px")
+                .select("#name1")
+                .text(d.gs1);
+        
+            genelistObj.select("#name2")
+                .text(d.gs2);
+        
+            genelistObj.select("#edgeGenes")
+                .selectAll("li")
+                .remove();
+            if (d.gsIntersect.length < 15) {
+                kmax = d.gsIntersect.length;
+            } else {
+                kmax = 15;
+            }
+            for (k = 0; k < kmax; k += 1) {
+                genelistObj.select("#edgeGenes")
+                    .append("li")
+                    .text(d.gsIntersect[k]);
+            }
+            genelistObj.select("#edgeGenes")
+                    .append("li")
+                    .text("...");
+            
             d3.select("#genelists").classed("hidden", false);
         })
         .on("mouseout", function (d) {
             d3.select(this).attr("stroke", edgeColor);
             d3.select("#genelists").classed("hidden", true);
+        })
+        .on("click", function (d) {
+            var panelObj,
+                clickedEdge,
+                GeneSetName1,
+                GeneSetName2,
+                k;
+            
+            // Show menu
+            if (menuSet === 0) {
+                menuOn();
+            }
+            
+            // Animate edge
+            svgObj.selectAll("line").classed("selectedEdge", false);
+            svgObj.selectAll("circle").classed("selectedNode", false);
+            clickedEdge = d3.select(this);
+            clickedEdge.attr("class", "selectedEdge");
+            selectedEdgeTrans(clickedEdge);
+        
+            // Populate menu with metadata
+            d3.select("#nodeInfo").classed("hidden", true);
+            GeneSetName1 = d.gs1;
+            GeneSetName2 = d.gs2;
+            panelObj = d3.select("#edgeInfo");
+            panelObj.classed("hidden", false);
+            panelObj.select("#textTitle1").select("span")
+                .text(GeneSetName1);
+            panelObj.select("#textTitle2").select("span")
+                .text(GeneSetName2);
+            panelObj.select("#Jaccard").select("span")
+                .text("Jaccard Index = " + d.Jaccard);
+        
+            panelObj.select("#commonGenes").selectAll("li").remove();
+            for (k = 0; k < d.gsIntersect.length; k += 1) {
+                panelObj.select("#commonGenes")
+                    .append("li")
+                    .text(d.gsIntersect[k]);
+                    console.log(d.gsIntersect[k])
+            }
         });
 }
 
@@ -493,8 +615,8 @@ function edgeLoaded(event) {
     
     //alert("File Loaded Successfully");
     var lines = event.target.result.split('\n'),
-        edges = parseEdges(lines);
-    plotEdges(edges);
+        odfObj = parseODF(lines);
+    plotEdges(odfObj.data, odfObj.metadata);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -555,12 +677,4 @@ function startPlot(event) {
             alert("No Edge file found. Please load an appropriate file.");
         }
     }
-}
-
-function davidAnnotation(event) {
-    "use strict";
-    
-    var panelObj = d3.select("#nodeInfo"),
-        data = panelObj.select("#davidannotation").enter();
-    // window.location.href = "http://";
 }
