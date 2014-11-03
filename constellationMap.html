@@ -38,7 +38,7 @@
                         </ul>
                     </li>
                     </br>
-                    <button type="button" class="msigdbannotation">MsigDB Annotation</button>
+                    <button type="button" class="msigdbannotation">MSigDB Annotation</button>
                     
                     <button type="button" class="davidannotation">DAVID Annotation</button>
                 </ul>
@@ -57,7 +57,7 @@
                         </ul>
                     </li>
                     </br>
-                    <button type="button" class="msigdbannotation">MsigDB Annotation</button>
+                    <button type="button" class="msigdbannotation">MSigDB Annotation</button>
                     
                     <button type="button" class="davidannotation">DAVID Annotation</button>
                 </ul>
@@ -92,7 +92,7 @@
     <div id="tooltip" class="hidden">
 	    <p><strong>Gene Set: </strong><span id="name">100</span></p>
 	    <p><strong>Number of Genes: </strong><span id="size">100</span></p>
-	    <p><strong>MsigDB URL: </strong><span id="url">100</span></p>
+	    <!--<p><strong>MSigDB URL: </strong><span id="url">100</span></p>-->
     </div>
 
     <div id="phenTooltip" class="hidden">
@@ -147,6 +147,14 @@
         menuSet = 0;
         menuTabOn();
         menuTabOff();
+        
+        /*d3.select("body")
+            .on("click", function() {
+                if (d3.event.shiftKey) {
+                    console.log("yay!");
+                }
+                console.log("hey!");
+        });*/
     
 	</script>
     

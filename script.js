@@ -151,6 +151,34 @@ function unique(array1, array2) {
     return (outArray);
 }
 
+function queryMsigdb(genelist) {
+    "use strict";
+    var k,
+        url;
+    
+    url = "http://www.broadinstitute.org/gsea/msigdb/annotate.jsp?geneList=";
+    for (k = 0; k < genelist.length; k += 1) {
+        url += genelist[k];
+        url += ",";
+    }
+    window.open(url);
+}
+
+function queryDavid(genelist) {
+    "use strict";
+    var k,
+        url;
+    // currently assume that the ids are gene symbols, need change to the real encoding later
+    url = "http://david.abcc.ncifcrf.gov/api.jsp?type=OFFICIAL_GENE_SYMBOL&ids=";
+    for (k = 0; k < genelist.length; k += 1) {
+        url += genelist[k];
+        url += ",";
+    }
+    // hard code the tool as summary
+    url += "&tool=summary";
+    window.open(url);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Functions for sliding menu with button
 ////////////////////////////////////////////////////////////////////////////////
@@ -341,11 +369,29 @@ function brushStop(event) {
                 outStr2 = outStr2 + "<br/>" + geneUnion[i];
             }
         }
+        outStr2 = outStr2 + "<br/>";
         panelObj.select("#gsUnion").html(outStr2);
+        // Add MSigDB and DAVID annotation buttons
+        panelObj.select("#gsUnion").append("button")
+            .attr("type", "button")
+            .attr("class", "msigdbannotation")
+            .text("MSigDB Annotation");
+        panelObj.select("#gsUnion").append("button")
+            .attr("type", "button")
+            .attr("class", "davidannotation")
+            .text("DAVID Annotation");
+        panelObj.select("#gsUnion > .msigdbannotation")
+            .on("click", function () {
+                queryMsigdb(geneUnion);
+            });
+        panelObj.select("#gsUnion > .davidannotation")
+            .on("click", function () {
+                queryDavid(geneUnion);
+            });
         
         // Populate #gsIntersect with genes in intersect
         if (geneIntersect.length === 0) {
-            outStr3 = "[Empty]";
+            panelObj.select("#gsIntersect").html("[Empty]");
         } else {
             for (i = 0; i < geneIntersect.length; i += 1) {
                 if (i === 0) {
@@ -354,12 +400,30 @@ function brushStop(event) {
                     outStr3 = outStr3 + "<br/>" + geneIntersect[i];
                 }
             }
+            outStr3 = outStr3 + "<br/>";
+            panelObj.select("#gsIntersect").html(outStr3);
+            // Add MSigDB and DAVID annotation buttons
+            panelObj.select("#gsIntersect").append("button")
+                .attr("type", "button")
+                .attr("class", "msigdbannotation")
+                .text("MSigDB Annotation");
+            panelObj.select("#gsIntersect").append("button")
+                .attr("type", "button")
+                .attr("class", "davidannotation")
+                .text("DAVID Annotation");
+            panelObj.select("#gsIntersect > .msigdbannotation")
+                .on("click", function () {
+                    queryMsigdb(geneIntersect);
+                });
+            panelObj.select("#gsIntersect > .davidannotation")
+                .on("click", function () {
+                    queryDavid(geneIntersect);
+                });
         }
-        panelObj.select("#gsIntersect").html(outStr3);
         
         // Populate #gsIntersectFuzzy with genes in fuzzy intersect
         if (geneIntersectFuzzy.length === 0) {
-            outStr4 = "[Empty]";
+            panelObj.select("#gsIntersectFuzzy").html("[Empty]");
         } else {
             for (i = 0; i < geneIntersectFuzzy.length; i += 1) {
                 if (i === 0) {
@@ -368,8 +432,49 @@ function brushStop(event) {
                     outStr4 = outStr4 + "<br/>" + geneIntersectFuzzy[i];
                 }
             }
+            outStr4 = outStr4 + "<br/>";
+            panelObj.select("#gsIntersectFuzzy").html(outStr4);
+            // Add MSigDB and DAVID annotation buttons
+            panelObj.select("#gsIntersectFuzzy").append("button")
+                .attr("type", "button")
+                .attr("class", "msigdbannotation")
+                .text("MSigDB Annotation");
+            panelObj.select("#gsIntersectFuzzy").append("button")
+                .attr("type", "button")
+                .attr("class", "davidannotation")
+                .text("DAVID Annotation");
+            panelObj.select("#gsIntersectFuzzy > .msigdbannotation")
+                .on("click", function () {
+                    queryMsigdb(geneIntersectFuzzy);
+                });
+            panelObj.select("#gsIntersectFuzzy > .davidannotation")
+                .on("click", function () {
+                    queryDavid(geneIntersectFuzzy);
+                });
         }
-        panelObj.select("#gsIntersectFuzzy").html(outStr4);
+        
+        /*panelObj.select(".msigdbannotation")
+            .on("click", function () {
+                var url = "http://www.broadinstitute.org/gsea/msigdb/annotate.jsp?geneList=";
+                for (k = 0; k < dataObj.MemberGenes.length; k += 1) {
+                    url += dataObj.MemberGenes[k];
+                    url += ",";
+                }
+                window.open(url);
+            });
+
+        panelObj.select(".davidannotation")
+            .on("click", function () {
+                // currently assume that the ids are gene symbols, need change to the real encoding later
+                var url = "http://david.abcc.ncifcrf.gov/api.jsp?type=OFFICIAL_GENE_SYMBOL&ids=";
+                for (k = 0; k < dataObj.MemberGenes.length; k += 1) {
+                    url += dataObj.MemberGenes[k];
+                    url += ",";
+                }
+                // hard code the tool as summary
+                url += "&tool=summary";
+                window.open(url);
+            });*/
     }
 }
 
@@ -641,25 +746,12 @@ function plotNodes(nodes, nodesMeta) {
 
                 panelObj.select(".msigdbannotation")
                     .on("click", function () {
-                        var url = "http://www.broadinstitute.org/gsea/msigdb/annotate.jsp?geneList=";
-                        for (k = 0; k < dataObj.MemberGenes.length; k += 1) {
-                            url += dataObj.MemberGenes[k];
-                            url += ",";
-                        }
-                        window.open(url);
+                        queryMsigdb(dataObj.MemberGenes);
                     });
 
                 panelObj.select(".davidannotation")
                     .on("click", function () {
-                        // currently assume that the ids are gene symbols, need change to the real encoding later
-                        var url = "http://david.abcc.ncifcrf.gov/api.jsp?type=OFFICIAL_GENE_SYMBOL&ids=";
-                        for (k = 0; k < dataObj.MemberGenes.length; k += 1) {
-                            url += dataObj.MemberGenes[k];
-                            url += ",";
-                        }
-                        // hard code the tool as summary
-                        url += "&tool=summary";
-                        window.open(url);
+                        queryDavid(dataObj.MemberGenes);
                     });
             }
         });
@@ -842,26 +934,12 @@ function plotEdges(edges, edgesMeta) {
             
             panelObj.select(".msigdbannotation")
                 .on("click", function () {
-                    console.log("foo bar");
-                    var url = "http://www.broadinstitute.org/gsea/msigdb/annotate.jsp?geneList=";
-                    for (k = 0; k < dataObj.gsIntersect.length; k += 1) {
-                        url += dataObj.gsIntersect[k];
-                        url += ",";
-                    }
-                    window.open(url);
+                    queryMsigdb(dataObj.gsIntersect);
                 });
 
             panelObj.select(".davidannotation")
                 .on("click", function () {
-                    // currently assume that the ids are gene symbols, need change to the real encoding later
-                    var url = "http://david.abcc.ncifcrf.gov/api.jsp?type=OFFICIAL_GENE_SYMBOL&ids=";
-                    for (k = 0; k < dataObj.gsIntersect.length; k += 1) {
-                        url += dataObj.gsIntersect[k];
-                        url += ",";
-                    }
-                    // hard code the tool as summary
-                    url += "&tool=summary";
-                    window.open(url);
+                    queryDavid(dataObj.gsIntersect);
                 });
         });
 }
