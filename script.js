@@ -8,7 +8,148 @@ script.js
 */
 
 /*jslint browser: true, devel: true*/
-/*global d3, xScale, yScale, svgObj, w, h, FileReader, menuSet: true, $*/
+/*global d3, xScale, yScale, svgObj, w, h, FileReader, menuSet: true, $, brush*/
+
+////////////////////////////////////////////////////////////////////////////////
+// Auxilliary functions
+////////////////////////////////////////////////////////////////////////////////
+
+function resetClasses(event) {
+    "use strict";
+    
+    svgObj.selectAll("circle").classed("selectedNode", false);
+    svgObj.selectAll("circle").classed("geneset", function (d) {
+        if (d.x === 0 && d.y === 0) {
+            return false;
+        } else {
+            return true;
+        }
+    });
+    svgObj.selectAll("line").classed("selectedEdge", false);
+}
+
+function intersect(a, b) {
+    "use strict";
+    
+    var ai = 0,
+        bi = 0,
+        result = [];
+
+    while (ai < a.length && bi < b.length) {
+        if (a[ai] < b[bi]) {
+            ai += 1;
+        } else if (a[ai] > b[bi]) {
+            bi += 1;
+        } else { /* they're equal */
+            result.push(a[ai]);
+            ai += 1;
+            bi += 1;
+        }
+    }
+
+    return result;
+}
+
+
+function intersect_mult(array2d) {
+    "use strict";
+    
+    var result = array2d[0].sort(),
+        i;
+    
+    for (i = 1; i < array2d.length; i += 1) {
+        result = intersect(result, array2d[i].sort());
+    }
+    
+    return result;
+}
+
+function union(a, b) {
+    "use strict";
+    
+    var ai = 0,
+        bi = 0,
+        result = [];
+
+    while (ai < a.length && bi < b.length) {
+        if (a[ai] < b[bi]) {
+            result.push(a[ai]);
+            ai += 1;
+        } else if (a[ai] > b[bi]) {
+            result.push(b[bi]);
+            bi += 1;
+        } else { /* they're equal */
+            result.push(a[ai]);
+            ai += 1;
+            bi += 1;
+        }
+    }
+
+    if (ai === a.length && bi < b.length) {
+        result = result.concat(b.slice(bi, b.length));
+    } else if (bi === b.length && ai < a.length) {
+        result = result.concat(a.slice(ai, a.length));
+    }
+    return result;
+}
+
+function union_mult(array2d) {
+    "use strict";
+    
+    var result = array2d[0].sort(),
+        i;
+    
+    for (i = 1; i < array2d.length; i += 1) {
+        result = union(result, array2d[i].sort());
+    }
+    
+    return result;
+}
+
+function intersect_fuzzy(array2d, fuzz) {
+    "use strict";
+    
+    var i,
+        j,
+        arrayLen = array2d.length,
+        unionArray,
+        numMatch,
+        result = [];
+    
+    if (fuzz < 2 || fuzz > arrayLen || arrayLen === 1) {
+        return;
+    }
+    
+    if (arrayLen === 2 || arrayLen === fuzz) {
+        result = intersect_mult(array2d);
+    } else {
+        unionArray = union_mult(array2d);
+        for (i = 0; i < unionArray.length; i += 1) {
+            numMatch = 0;
+            j = 0;
+            while (numMatch < fuzz && j < arrayLen) {
+                numMatch = numMatch + (array2d[j].indexOf(unionArray[i]) > -1);
+                j += 1;
+            }
+            
+            if (numMatch === fuzz) {
+                result.push(unionArray[i]);
+            }
+        }
+    }
+    
+    return result;
+}
+
+function unique(array1, array2) {
+    "use strict";
+    
+    var outArray = array1.filter(function (n) {
+        return array2.indexOf(n) === -1;
+    });
+    
+    return (outArray);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Functions for sliding menu with button
@@ -76,8 +217,7 @@ function menuTabOff(event) {
     
     d3.select("#menuBtnOff")
         .on("click", function (d) {
-            svgObj.selectAll("circle").classed("selectedNode", false);
-            svgObj.selectAll("line").classed("selectedEdge", false);
+            resetClasses();
             menuOff();
         });
     
@@ -125,27 +265,112 @@ function selectedEdgeTrans(edgeObj) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Auxilliary functions
+// Functions for brush box
 ////////////////////////////////////////////////////////////////////////////////
 
-function intersect(array1, array2) {
+function brushMove(event) {
     "use strict";
     
-    var outArray = array1.filter(function (n) {
-        return array2.indexOf(n) !== -1;
-    });
+    resetClasses();
     
-    return (outArray);
+    var e = brush.extent(),
+        points = svgObj.selectAll(".geneset");
+    
+    points.classed("selected", function (d) {
+        return e[0][0] < xScale(d.x) && xScale(d.x) < e[1][0]
+            && e[0][1] < (h - yScale(d.y)) && (h - yScale(d.y)) < e[1][1];
+    });
+    //points.each(function(d) { d.selected = false; });
 }
 
-function unique(array1, array2) {
+function brushStop(event) {
     "use strict";
     
-    var outArray = array1.filter(function (n) {
-        return array2.indexOf(n) === -1;
-    });
+    var selectedPts = svgObj.selectAll(".selected").data(),
+        i,
+        panelObj,
+        ptObj,
+        outStr = "",
+        geneArray = [],
+        geneUnion,
+        geneIntersect,
+        geneIntersectFuzzy,
+        outStr2 = "",
+        outStr3 = "",
+        outStr4 = "";
     
-    return (outArray);
+    if (selectedPts.length !== 0) {
+        // Show menu
+        if (menuSet === 0) {
+            menuOn();
+        }
+        
+        // Hide other info panels and reveal multi-selection info panel
+        d3.select("#nodeInfo").classed("hidden", true);
+        d3.select("#edgeInfo").classed("hidden", true);
+        panelObj = d3.select("#selectionInfo");
+        panelObj.classed("hidden", false);
+        
+        // Populate #gsNames with gene set names
+        for (i = 0; i < selectedPts.length; i += 1) {
+            ptObj = selectedPts[i];
+            geneArray[i] = ptObj.MemberGenes;
+            if (i === 0) {
+                outStr = ptObj["Gene.Set.Name"];
+            } else {
+                outStr = outStr + "<br/>" + ptObj["Gene.Set.Name"];
+            }
+        }
+        panelObj.select("#gsNames").html(outStr);
+        
+        if (geneArray.length === 1) {
+            geneUnion = geneArray[0].sort();
+            geneIntersect = geneArray[0].sort();
+            geneIntersectFuzzy = geneArray[0].sort();
+        } else {
+            geneUnion = union_mult(geneArray);
+            geneIntersect = intersect_mult(geneArray);
+            geneIntersectFuzzy = intersect_fuzzy(geneArray, 2);
+        }
+        
+        // Populate #gsUnion with genes in union;
+        for (i = 0; i < geneUnion.length; i += 1) {
+            if (i === 0) {
+                outStr2 = geneUnion[i];
+            } else {
+                outStr2 = outStr2 + "<br/>" + geneUnion[i];
+            }
+        }
+        panelObj.select("#gsUnion").html(outStr2);
+        
+        // Populate #gsIntersect with genes in intersect
+        if (geneIntersect.length === 0) {
+            outStr3 = "[Empty]";
+        } else {
+            for (i = 0; i < geneIntersect.length; i += 1) {
+                if (i === 0) {
+                    outStr3 = geneIntersect[i];
+                } else {
+                    outStr3 = outStr3 + "<br/>" + geneIntersect[i];
+                }
+            }
+        }
+        panelObj.select("#gsIntersect").html(outStr3);
+        
+        // Populate #gsIntersectFuzzy with genes in fuzzy intersect
+        if (geneIntersectFuzzy.length === 0) {
+            outStr4 = "[Empty]";
+        } else {
+            for (i = 0; i < geneIntersectFuzzy.length; i += 1) {
+                if (i === 0) {
+                    outStr4 = geneIntersectFuzzy[i];
+                } else {
+                    outStr4 = outStr4 + "<br/>" + geneIntersectFuzzy[i];
+                }
+            }
+        }
+        panelObj.select("#gsIntersectFuzzy").html(outStr4);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -375,8 +600,12 @@ function plotNodes(nodes, nodesMeta) {
             }
             
             if (i !== nodelen) {
+                // Remove brush
+                d3.selectAll(".brush").call(brush.clear());
+                
                 // Animate node
                 svgObj.selectAll("circle").classed("selectedNode", false);
+                svgObj.selectAll("circle").classed("selected", false);
                 svgObj.selectAll("line").classed("selectedEdge", false);
                 clickedNode = d3.select(this);
                 clickedNode.attr("class", "selectedNode");
@@ -384,6 +613,7 @@ function plotNodes(nodes, nodesMeta) {
                 
                 // Populate menu with metadata
                 d3.select("#edgeInfo").classed("hidden", true);
+                d3.select("#selectionInfo").classed("hidden", true);
                 GeneSetName = d["Gene.Set.Name"];
                 panelObj = d3.select("#nodeInfo");
                 panelObj.classed("hidden", false);
@@ -512,7 +742,7 @@ function plotEdges(edges, edgesMeta) {
         
         edges[j].gs1Members = edgesMeta[gs1];
         edges[j].gs2Members = edgesMeta[gs2];
-        edges[j].gsIntersect = intersect(edges[j].gs1Members, edges[j].gs2Members);
+        edges[j].gsIntersect = intersect(edges[j].gs1Members.sort(), edges[j].gs2Members.sort());
         
         edges[j].gs1Unique = unique(edges[j].gs1Members, edges[j].gs2Members);
         edges[j].gs2Unique = unique(edges[j].gs2Members, edges[j].gs1Members);
@@ -703,4 +933,9 @@ function startPlot(event) {
             alert("No Edge file found. Please load an appropriate file.");
         }
     }
+    
+    svgObj.append("g")
+        .attr("class", "brush")
+        .call(brush)
+        .call(brush.event);
 }
