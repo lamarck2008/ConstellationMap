@@ -3,11 +3,11 @@
 
 <head>
 	<title>Constellation Map</title>
-    
-    <link href='http://fonts.googleapis.com/css?family=Rajdhani' rel='stylesheet' type='text/css'>
+
 	<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
     <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
+    <link href='http://fonts.googleapis.com/css?family=Rajdhani' rel='stylesheet' type='text/css'>
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <script type="text/javascript" src="script.js"></script>
     <script>
@@ -88,7 +88,7 @@
 
     </script>-->
     
-    
+    <!-- tooltip divs -->
     <div id="tooltip" class="hidden">
 	    <p><strong>Gene Set: </strong><span id="name">100</span></p>
 	    <p><strong>Number of Genes: </strong><span id="size">100</span></p>
@@ -109,7 +109,8 @@
         </ul>
     </div>
 
-	<div id="uploads">
+	<!-- uploads div -->
+    <div id="uploads">
         <h1>upload node file</h1>
         <input type="file" id="nodeFile" name="files[]" multiple />
 
