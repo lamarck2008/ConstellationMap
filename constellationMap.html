@@ -3,11 +3,18 @@
 
 <head>
 	<title>Constellation Map</title>
-    
-    <link href='http://fonts.googleapis.com/css?family=Rajdhani' rel='stylesheet' type='text/css'>
+
 	<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
+    <link href='http://fonts.googleapis.com/css?family=Rajdhani' rel='stylesheet' type='text/css'>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <script type="text/javascript" src="script.js"></script>
+    <script>
+        $(function() {
+            $("#accordion").accordion({ collapsible: true });
+        });
+    </script>
     <link rel="stylesheet" type="text/css" href="style.css">
 
 </head>
@@ -31,7 +38,7 @@
                         </ul>
                     </li>
                     </br>
-                    <button type="button" class="msigdbannotation">MsigDB Annotation</button>
+                    <button type="button" class="msigdbannotation">MSigDB Annotation</button>
                     
                     <button type="button" class="davidannotation">DAVID Annotation</button>
                 </ul>
@@ -50,9 +57,27 @@
                         </ul>
                     </li>
                     </br>
-                    <button type="button" class="msigdbannotation">MsigDB Annotation</button>
+                    <button type="button" class="msigdbannotation">MSigDB Annotation</button>
                     
                     <button type="button" class="davidannotation">DAVID Annotation</button>
+                </ul>
+            </div>
+    
+            <div id="selectionInfo" class="panel hidden">
+                <ul>
+                    <li class="infoTitle"><span>GS Selection</span></li>
+                    <li>
+                        <div id="accordion">
+                            <h3>Names</h3>
+                            <div id="gsNames"></div>
+                            <h3>Gene Union</h3>
+                            <div id="gsUnion"></div>
+                            <h3>Gene Intersect</h3>
+                            <div id="gsIntersect"></div>
+                            <h3>Gene Intersect (Fuzzy)</h3>
+                            <div id="gsIntersectFuzzy"></div>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -63,11 +88,11 @@
 
     </script>-->
     
-    
+    <!-- tooltip divs -->
     <div id="tooltip" class="hidden">
 	    <p><strong>Gene Set: </strong><span id="name">100</span></p>
 	    <p><strong>Number of Genes: </strong><span id="size">100</span></p>
-	    <p><strong>MsigDB URL: </strong><span id="url">100</span></p>
+	    <!--<p><strong>MSigDB URL: </strong><span id="url">100</span></p>-->
     </div>
 
     <div id="phenTooltip" class="hidden">
@@ -84,7 +109,8 @@
         </ul>
     </div>
 
-	<div id="uploads">
+	<!-- uploads div -->
+    <div id="uploads">
         <h1>upload node file</h1>
         <input type="file" id="nodeFile" name="files[]" multiple />
 
@@ -103,7 +129,14 @@
             svgObj,
             menuSet,
             xScale = d3.scale.linear(),
-            yScale = d3.scale.linear();
+            yScale = d3.scale.linear(),
+            defaultExtent = [[100, 100], [300, 300]];
+        
+        var brush = d3.svg.brush()
+            .x(d3.scale.identity().domain([0, w]))
+            .y(d3.scale.identity().domain([0, h]))
+            .on("brush", brushMove)
+            .on("brushend", brushStop);
         
         svgObj = d3.select("#svgContainer")
                 .append("svg")
@@ -115,6 +148,15 @@
         menuSet = 0;
         menuTabOn();
         menuTabOff();
+        
+        /*d3.select("body")
+            .on("click", function() {
+                if (d3.event.shiftKey) {
+                    console.log("yay!");
+                }
+                console.log("hey!");
+        });*/
+    
 	</script>
     
 </body>

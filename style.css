@@ -3,6 +3,7 @@ style.css
     CSS stylesheet for constellationMap.html
 */
 
+
 html, body {
     margin: 0;
     padding:0;
@@ -159,6 +160,9 @@ svg.canvas {
     display: block;
     margin-left: 300px;
     margin-right: auto;
+    border-style: solid;
+    border-color: #334f6d;
+    border-wdith: 2px;
     /*background: azure;*/
     /*-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);*/
     /*-moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);*/
@@ -195,13 +199,13 @@ ul {
 }
 .panel > ul {
     font-family: 'Rajdhani', sans-serif;
-    color: #acc7d4;
+    color: #334f6d;
     width: auto;
     padding-left: 0;
     margin: 16px 10px 16px 40px;
 }
 .infoTitle span {
-    font-size: 45px;
+    font-size: 40px;
     font-weight: 600;
 }
 .xScroll {
@@ -235,6 +239,36 @@ ul {
     overflow-y: auto;
 }
 
-/*.selectedNode {
-    fill: #d65667;
-}*/
+.selected {
+    stroke: #d65667;
+    stroke-width: 2;
+}
+
+.brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
+
+#accordion {
+    font-family: 'Rajdhani', sans-serif;
+}
+
+#accordion h3 {
+    font-size: 25px;
+    font-weight: 500px;
+    color: #334f6d;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+#accordion div {
+    font-size: 18px;
+    height: 200px;
+    padding: 5px 0px 0px 5px;
+    color: #334f6d;
+}
+
+#accordion button {
+    font-size: 14px;
+}

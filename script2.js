@@ -10,6 +10,8 @@ script.js
 /*jslint browser: true, devel: true*/
 /*global d3, xScale, yScale, svgObj, w, h, FileReader, menuSet: true, $, brush*/
 
+// HEY, note that all lines that have been commented for the reboot have been labeled "COMMENT"
+
 ////////////////////////////////////////////////////////////////////////////////
 // Auxilliary functions
 ////////////////////////////////////////////////////////////////////////////////
@@ -26,7 +28,7 @@ function resetClasses(event) {
         }
     });
     svgObj.selectAll("line").classed("selectedEdge", false);
-}
+} // END resetClasses
 
 function intersect(a, b) {
     "use strict";
@@ -48,8 +50,7 @@ function intersect(a, b) {
     }
 
     return result;
-}
-
+} // END intersect
 
 function intersect_mult(array2d) {
     "use strict";
@@ -62,7 +63,7 @@ function intersect_mult(array2d) {
     }
     
     return result;
-}
+} // END intersect_mult
 
 function union(a, b) {
     "use strict";
@@ -91,7 +92,7 @@ function union(a, b) {
         result = result.concat(a.slice(ai, a.length));
     }
     return result;
-}
+} // END union
 
 function union_mult(array2d) {
     "use strict";
@@ -104,7 +105,7 @@ function union_mult(array2d) {
     }
     
     return result;
-}
+} // END union_mult
 
 function intersect_fuzzy(array2d, fuzz) {
     "use strict";
@@ -139,7 +140,7 @@ function intersect_fuzzy(array2d, fuzz) {
     }
     
     return result;
-}
+} // END intersect_fuzzy
 
 function unique(array1, array2) {
     "use strict";
@@ -149,7 +150,7 @@ function unique(array1, array2) {
     });
     
     return (outArray);
-}
+} // END unique
 
 function queryMsigdb(genelist) {
     "use strict";
@@ -162,7 +163,7 @@ function queryMsigdb(genelist) {
         url += ",";
     }
     window.open(url);
-}
+} // END queryMsigdb
 
 function queryDavid(genelist) {
     "use strict";
@@ -177,120 +178,42 @@ function queryDavid(genelist) {
     // hard code the tool as summary
     url += "&tool=summary";
     window.open(url);
-}
+} // END queryDavid
 
-////////////////////////////////////////////////////////////////////////////////
-// Functions for sliding menu with button
-////////////////////////////////////////////////////////////////////////////////
-
-function menuOn(event) {
+function metadataRemove(event) {
     "use strict";
-    
-    d3.select("#menuContainer")
-        .transition()
-        .duration(750)
-        .style("right", "0px");
-    d3.select("#menuBtnOn")
-        .transition()
-        .duration(750)
-        .style("opacity", "0");
-    d3.select("#menuBtnOn")
-        .transition()
-        .delay(750)
-        .attr("class", "hidden");
-    d3.select("#menuBtnOff")
-        .classed("hidden", false);
-    d3.select("#menuBtnOff")
-        .transition()
-        .duration(750)
-        .style("opacity", "1");
-}
-
-function menuOff(event) {
-    "use strict";
-
-    d3.select("#menuContainer")
-        .transition()
-        .duration(750)
-        .style("right", "-285px");
-    d3.select("#menuBtnOff")
-        .transition()
-        .duration(750)
-        .style("opacity", "0");
-    d3.select("#menuBtnOff")
-        .transition()
-        .delay(750)
-        .attr("class", "hidden");
-    d3.select("#menuBtnOn")
-        .classed("hidden", false);
-    d3.select("#menuBtnOn")
-        .transition()
-        .duration(750)
-        .style("opacity", "1");
-}
-
-function menuTabOn(event) {
-    "use strict";
-
-    d3.select("#menuBtnOn")
-        .on("click", function (d) {
-            menuOn();
-        });
-    
-    menuSet = 1;
-}
-
-function menuTabOff(event) {
-    "use strict";
-    
-    d3.select("#menuBtnOff")
-        .on("click", function (d) {
-            resetClasses();
-            menuOff();
-        });
-    
-    menuSet = 0;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Transitions / animations
-////////////////////////////////////////////////////////////////////////////////
-
-function selectedNodeTrans(nodeObj) {
-    "use strict";
-    var nodeClass = nodeObj.attr("class");
-    if (nodeClass === "selectedNode") {
-        nodeObj.transition()
-            .duration(800)
-            //.attr("class", "selectedNode")
-            .style("fill", "#d65667")
-            .each("end", function () {
-                nodeObj.transition()
-                    .duration(400)
-                    //.attr("class", "geneset")
-                    .style("fill", "#0a8166")
-                    .each("end", function () { selectedNodeTrans(nodeObj); });
-            });
+    if (typeof event === "undefined") {
+        d3.select("#tableOne").select("tbody").selectAll("tr").remove();
+        d3.select("#tableTwo").select("tbody").selectAll("tr").remove();
+    } else if (event === 1) {
+        d3.select("#tableOne").select("tbody").selectAll("tr").remove();
+    } else if (event === 2) {
+        d3.select("#tableTwo").select("tbody").selectAll("tr").remove();
     }
-}
+} // END metadataRemove
 
-function selectedEdgeTrans(edgeObj) {
+function unhideInfo(event) {
     "use strict";
-    var edgeClass = edgeObj.attr("class");
-    if (edgeClass === "selectedEdge") {
-        edgeObj.transition()
-            .duration(800)
-            //.attr("class", "selectedNode")
-            .style("stroke", "#d65667")
-            .each("end", function () {
-                edgeObj.transition()
-                    .duration(400)
-                    //.attr("class", "geneset")
-                    .style("stroke", "#334f6d")
-                    .each("end", function () { selectedEdgeTrans(edgeObj); });
-            });
-    }
-}
+    // Unhide live text, tables, and buttons
+    d3.selectAll(".liveText").classed("hidden", false);
+    d3.selectAll(".infoTable").classed("hidden", false);
+    d3.selectAll(".infoButton").classed("hidden", false);
+    
+    // Hide default text
+    d3.selectAll(".defaultText").classed("hidden", true);
+} // END unhideInfo
+
+function round(value, n) {
+    // Round <value> to <n> decimal places
+    "use strict";
+    var p,
+        result;
+    
+    p = Math.pow(10, n);
+    result = Math.round(value * p) / p;
+    
+    return result;
+} // END round
 
 ////////////////////////////////////////////////////////////////////////////////
 // Functions for brush box
@@ -304,7 +227,7 @@ function brushMove(event) {
     var e = brush.extent(),
         points = svgObj.selectAll(".geneset");
     
-    points.classed("selected", function (d) {
+    points.classed("selectedNode", function (d) {
         return e[0][0] < xScale(d.x) && xScale(d.x) < e[1][0]
             && e[0][1] < (h - yScale(d.y)) && (h - yScale(d.y)) < e[1][1];
     });
@@ -314,170 +237,87 @@ function brushMove(event) {
 function brushStop(event) {
     "use strict";
     
-    var selectedPts = svgObj.selectAll(".selected").data(),
+    var selectedPts = svgObj.selectAll(".selectedNode").data(),
         i,
+        tableOneObj,
+        tableTwoObj,
+        tableThreeObj,
+        tableRowObj,
         panelObj,
         ptObj,
-        outStr = "",
         geneArray = [],
         geneUnion,
-        geneIntersect,
-        geneIntersectFuzzy,
-        outStr2 = "",
-        outStr3 = "",
-        outStr4 = "";
+        geneIntersect;
     
     if (selectedPts.length !== 0) {
-        // Show menu
-        if (menuSet === 0) {
-            menuOn();
-        }
         
-        // Hide other info panels and reveal multi-selection info panel
-        d3.select("#nodeInfo").classed("hidden", true);
-        d3.select("#edgeInfo").classed("hidden", true);
-        panelObj = d3.select("#selectionInfo");
-        panelObj.classed("hidden", false);
+        // Unhide tables as well as intersect/union form, hide default text
+        unhideInfo();
+        d3.select(".miniForm").classed("hidden", false);
+
+        // Remove previous metadata in panels
+        metadataRemove();
         
-        // Populate #gsNames with gene set names
+        // Populate panel with metadata
+        // 1. Gene Set Name(s)
+        d3.select("#liveTextOne")
+            .text(selectedPts.length + " gene set(s) selected."); // live text
+        tableOneObj = d3.select("#tableOne");
         for (i = 0; i < selectedPts.length; i += 1) {
             ptObj = selectedPts[i];
             geneArray[i] = ptObj.MemberGenes;
-            if (i === 0) {
-                outStr = ptObj["Gene.Set.Name"];
-            } else {
-                outStr = outStr + "<br/>" + ptObj["Gene.Set.Name"];
-            }
+            
+            tableRowObj = tableOneObj.select("tbody").append("tr");
+            tableRowObj.append("td").append("a")
+                .attr("href", ptObj.url)
+                .attr("target", "_blank")
+                .text(ptObj["Gene.Set.Name"]);
+            tableRowObj.append("td")
+                .text(ptObj["gene.set.size"]);
+            tableRowObj.append("td")
+                .text("(" + round(ptObj.x, 3) + "," + round(ptObj.y, 3) + ")");
         }
-        panelObj.select("#gsNames").html(outStr);
         
+        // Calculate union, intersect
         if (geneArray.length === 1) {
-            geneUnion = geneArray[0].sort();
             geneIntersect = geneArray[0].sort();
-            geneIntersectFuzzy = geneArray[0].sort();
+            geneUnion = geneArray[0].sort();
         } else {
-            geneUnion = union_mult(geneArray);
             geneIntersect = intersect_mult(geneArray);
-            geneIntersectFuzzy = intersect_fuzzy(geneArray, 2);
+            geneUnion = union_mult(geneArray);
         }
         
-        // Populate #gsUnion with genes in union;
-        for (i = 0; i < geneUnion.length; i += 1) {
-            if (i === 0) {
-                outStr2 = geneUnion[i];
-            } else {
-                outStr2 = outStr2 + "<br/>" + geneUnion[i];
-            }
-        }
-        outStr2 = outStr2 + "<br/>";
-        panelObj.select("#gsUnion").html(outStr2);
-        // Add MSigDB and DAVID annotation buttons
-        panelObj.select("#gsUnion").append("button")
-            .attr("type", "button")
-            .attr("class", "msigdbannotation")
-            .text("MSigDB Annotation");
-        panelObj.select("#gsUnion").append("button")
-            .attr("type", "button")
-            .attr("class", "davidannotation")
-            .text("DAVID Annotation");
-        panelObj.select("#gsUnion > .msigdbannotation")
-            .on("click", function () {
-                queryMsigdb(geneUnion);
-            });
-        panelObj.select("#gsUnion > .davidannotation")
-            .on("click", function () {
-                queryDavid(geneUnion);
-            });
-        
-        // Populate #gsIntersect with genes in intersect
+        // 2. Member Genes
+        //// Default: intersect (all)
+        d3.select("#liveTextTwo")
+            .text(geneIntersect.length + " genes shown. " + geneUnion.length + " unique genes in selected geneset(s)"); // live text
+        $("#fuzzFactor").val(selectedPts.length); // set intersect fuzz factor to # selected genesets
+        $("#fuzzFactor").prop("disabled", false); // enable fuzz factor
+        $("#uniInt").val("Intersect"); // set uniInt to intersect
+        tableTwoObj = d3.select("#tableTwo");
         if (geneIntersect.length === 0) {
-            panelObj.select("#gsIntersect").html("[Empty]");
+            tableTwoObj.select("tbody").append("tr")
+                .append("td")
+                .text("No genes in intersect");
         } else {
             for (i = 0; i < geneIntersect.length; i += 1) {
-                if (i === 0) {
-                    outStr3 = geneIntersect[i];
-                } else {
-                    outStr3 = outStr3 + "<br/>" + geneIntersect[i];
-                }
+                tableTwoObj.select("tbody").append("tr")
+                    .append("td")
+                    .text(geneIntersect[i]);
             }
-            outStr3 = outStr3 + "<br/>";
-            panelObj.select("#gsIntersect").html(outStr3);
-            // Add MSigDB and DAVID annotation buttons
-            panelObj.select("#gsIntersect").append("button")
-                .attr("type", "button")
-                .attr("class", "msigdbannotation")
-                .text("MSigDB Annotation");
-            panelObj.select("#gsIntersect").append("button")
-                .attr("type", "button")
-                .attr("class", "davidannotation")
-                .text("DAVID Annotation");
-            panelObj.select("#gsIntersect > .msigdbannotation")
-                .on("click", function () {
-                    queryMsigdb(geneIntersect);
-                });
-            panelObj.select("#gsIntersect > .davidannotation")
-                .on("click", function () {
-                    queryDavid(geneIntersect);
-                });
         }
-        
-        // Populate #gsIntersectFuzzy with genes in fuzzy intersect
-        if (geneIntersectFuzzy.length === 0) {
-            panelObj.select("#gsIntersectFuzzy").html("[Empty]");
-        } else {
-            for (i = 0; i < geneIntersectFuzzy.length; i += 1) {
-                if (i === 0) {
-                    outStr4 = geneIntersectFuzzy[i];
-                } else {
-                    outStr4 = outStr4 + "<br/>" + geneIntersectFuzzy[i];
-                }
-            }
-            outStr4 = outStr4 + "<br/>";
-            panelObj.select("#gsIntersectFuzzy").html(outStr4);
-            // Add MSigDB and DAVID annotation buttons
-            panelObj.select("#gsIntersectFuzzy").append("button")
-                .attr("type", "button")
-                .attr("class", "msigdbannotation")
-                .text("MSigDB Annotation");
-            panelObj.select("#gsIntersectFuzzy").append("button")
-                .attr("type", "button")
-                .attr("class", "davidannotation")
-                .text("DAVID Annotation");
-            panelObj.select("#gsIntersectFuzzy > .msigdbannotation")
-                .on("click", function () {
-                    queryMsigdb(geneIntersectFuzzy);
-                });
-            panelObj.select("#gsIntersectFuzzy > .davidannotation")
-                .on("click", function () {
-                    queryDavid(geneIntersectFuzzy);
-                });
-        }
-        
-        /*panelObj.select(".msigdbannotation")
+        // 3. Annotation
+        d3.select(".msigdbannotation")
             .on("click", function () {
-                var url = "http://www.broadinstitute.org/gsea/msigdb/annotate.jsp?geneList=";
-                for (k = 0; k < dataObj.MemberGenes.length; k += 1) {
-                    url += dataObj.MemberGenes[k];
-                    url += ",";
-                }
-                window.open(url);
+                queryMsigdb(geneIntersect);
             });
 
-        panelObj.select(".davidannotation")
+        d3.select(".davidannotation")
             .on("click", function () {
-                // currently assume that the ids are gene symbols, need change to the real encoding later
-                var url = "http://david.abcc.ncifcrf.gov/api.jsp?type=OFFICIAL_GENE_SYMBOL&ids=";
-                for (k = 0; k < dataObj.MemberGenes.length; k += 1) {
-                    url += dataObj.MemberGenes[k];
-                    url += ",";
-                }
-                // hard code the tool as summary
-                url += "&tool=summary";
-                window.open(url);
-            });*/
+                queryDavid(geneIntersect);
+            });
     }
 }
-
 ////////////////////////////////////////////////////////////////////////////////
 // Function for parsing nodes.odf
 ////////////////////////////////////////////////////////////////////////////////
@@ -693,63 +533,65 @@ function plotNodes(nodes, nodesMeta) {
             }
         })
         .on("click", function (d, i) {
-            var panelObj,
+            var tableOneObj,
+                tableTwoObj,
                 GeneSetName,
                 k,
                 clickedNode,
                 dataObj;
             
-            // Show menu
-            if (menuSet === 0) {
-                menuOn();
-            }
-            
             if (i !== nodelen) {
                 // Remove brush
                 d3.selectAll(".brush").call(brush.clear());
                 
-                // Animate node
+                // Highlight node
                 svgObj.selectAll("circle").classed("selectedNode", false);
                 svgObj.selectAll("circle").classed("selected", false);
                 svgObj.selectAll("line").classed("selectedEdge", false);
                 clickedNode = d3.select(this);
-                clickedNode.attr("class", "selectedNode");
-                selectedNodeTrans(clickedNode);
+                clickedNode.classed("selectedNode", true);
                 
-                // Populate menu with metadata
-                d3.select("#edgeInfo").classed("hidden", true);
-                d3.select("#selectionInfo").classed("hidden", true);
+                // Unhide tables, hide default text and 
+                unhideInfo();
+                d3.selectAll(".miniForm").classed("hidden", true);
+                
+                // Remove previous metadata in panels
+                metadataRemove();
+                
+                // Populate panel with metadata
+                // 1. Gene Set Name(s)
+                d3.select("#liveTextOne")
+                    .text("1 gene set selected."); // live text
                 GeneSetName = d["Gene.Set.Name"];
-                panelObj = d3.select("#nodeInfo");
-                panelObj.classed("hidden", false);
-                panelObj.select("#textTitle").select("span")
-                    .text(GeneSetName);
-                panelObj.select("#MemberGenes").select("span")
-                    .text("Member Genes (" + d["gene.set.size"] + ")");
-                panelObj.select("#textURL").select("a")
+                tableOneObj = d3.select("#tableOne");
+                tableOneObj.select("tbody").append("tr").append("td").append("a")
                     .attr("href", d.url)
-                    .attr("target", "_blank");
-                // Set coordinates; may not want this
-                panelObj.select("#textX").select("span")
-                    .text("X: " + d.x);
-                panelObj.select("#textY").select("span")
-                    .text("Y: " + d.y);
+                    .attr("target", "_blank")
+                    .text(GeneSetName);
+                tableOneObj.select("tbody").select("tr").append("td")
+                    .text(d["gene.set.size"]);
+                tableOneObj.select("tbody").select("tr").append("td")
+                    .text("(" + round(d.x, 3) + "," + round(d.y, 3) + ")");
                 
-                panelObj.select("#nodeGenes").selectAll("li").remove();
+                // 2. Member Genes
+                d3.select("#liveTextTwo")
+                    .text(d["gene.set.size"] + " genes shown. " + d["gene.set.size"] + " unique genes in selected geneset(s)."); // live text
+                tableTwoObj = d3.select("#tableTwo");
                 for (k = 0; k < d.MemberGenes.length; k += 1) {
-                    panelObj.select("#nodeGenes")
-                        .append("li")
+                    tableTwoObj.select("tbody").append("tr")
+                        .append("td")
                         .text(d.MemberGenes[k]);
                 }
                 
                 dataObj = d;
-
-                panelObj.select(".msigdbannotation")
+                
+                // 3. Annotation
+                d3.select(".msigdbannotation")
                     .on("click", function () {
                         queryMsigdb(dataObj.MemberGenes);
                     });
 
-                panelObj.select(".davidannotation")
+                d3.select(".davidannotation")
                     .on("click", function () {
                         queryDavid(dataObj.MemberGenes);
                     });
@@ -768,47 +610,13 @@ function nodeLoaded(event) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // Functions for parsing edges.odf and plotting dge data
-////////////////////////////////////////////////////////////////////////////////	
-
-/*function parseEdges(lines) {
-    "use strict";
-    
-    var headerLine = 'HeaderLines',
-        dataLine = 'DataLines',
-        edges = [],
-        numOfEdges = 0,
-        line,
-        data,
-        i;
-
-    for (line = 1; line < lines.length; line += 1) {
-        data = lines[line];
-        numOfEdges = data.split("=")[1];
-
-        if (data.substring(0, dataLine.length) === dataLine) {
-
-            for (i = 0; i < numOfEdges; i += 1) {
-                line += 1;
-                data = lines[line].split("\t");
-                edges[i] = {"Name": "edges" + i};
-                edges[i].Start = data[0];
-                edges[i].X1 = data[1];
-                edges[i].Y1 = data[2];
-                edges[i].End = data[3];
-                edges[i].X2 = data[4];
-                edges[i].Y2 = data[5];
-                edges[i].jaccard = data[6];
-            }
-        }
-    }
-    return edges;
-}*/
+////////////////////////////////////////////////////////////////////////////////
 
 function plotEdges(edges, edgesMeta) {
     "use strict";
     
-    var edgeColor = "#334f6d",
-        selectedEdgeColor = "#d65667",
+    var edgeColor = "#C4BB9C",
+        selectedEdgeColor = "#ca0020",
         jmin,
         jmax,
         j,
@@ -835,6 +643,7 @@ function plotEdges(edges, edgesMeta) {
         edges[j].gs1Members = edgesMeta[gs1];
         edges[j].gs2Members = edgesMeta[gs2];
         edges[j].gsIntersect = intersect(edges[j].gs1Members.sort(), edges[j].gs2Members.sort());
+        edges[j].gsUnion = union(edges[j].gs1Members.sort(), edges[j].gs2Members.sort());
         
         edges[j].gs1Unique = unique(edges[j].gs1Members, edges[j].gs2Members);
         edges[j].gs2Unique = unique(edges[j].gs2Members, edges[j].gs1Members);
@@ -891,53 +700,74 @@ function plotEdges(edges, edgesMeta) {
             d3.select("#genelists").classed("hidden", true);
         })
         .on("click", function (d) {
-            var panelObj,
+            var tableOneObj,
+                tableTwoObj,
+                tableThreeObj,
+                tableRowObj,
                 clickedEdge,
-                GeneSetName1,
-                GeneSetName2,
+                GeneSetNames,
+                numGenes,
+                xcoord,
+                ycoord,
                 k,
                 dataObj;
             
-            // Show menu
-            if (menuSet === 0) {
-                menuOn();
-            }
-            
-            // Animate edge
+            // Remove brush
+            d3.selectAll(".brush").call(brush.clear());
+        
+            // Highlight edge
             svgObj.selectAll("line").classed("selectedEdge", false);
             svgObj.selectAll("circle").classed("selectedNode", false);
             clickedEdge = d3.select(this);
-            clickedEdge.attr("class", "selectedEdge");
-            selectedEdgeTrans(clickedEdge);
+            clickedEdge.classed("selectedEdge", true);
+            
+            // Unhide tables, hide default text and miniForm
+            unhideInfo();
+            d3.selectAll(".miniForm").classed("hidden", true); // COMMENT
+
+            // Remove previous metadata in panels
+            metadataRemove();
         
-            // Populate menu with metadata
-            d3.select("#nodeInfo").classed("hidden", true);
-            GeneSetName1 = d.gs1;
-            GeneSetName2 = d.gs2;
-            panelObj = d3.select("#edgeInfo");
-            panelObj.classed("hidden", false);
-            panelObj.select("#textTitle1").select("span")
-                .text(GeneSetName1);
-            panelObj.select("#textTitle2").select("span")
-                .text(GeneSetName2);
-            panelObj.select("#Jaccard").select("span")
-                .text("Jaccard Index = " + d.Jaccard);
-        
-            panelObj.select("#commonGenes").selectAll("li").remove();
+            // Populate panel with metadata
+            // 1. Gene Set Name(s)
+            d3.select("#liveTextOne")
+                .text("1 edge selected (2 gene sets). Jaccard = " + round(d.Jaccard, 3)); // live text
+            GeneSetNames = [d.gs1, d.gs2];
+            numGenes = [d.gs1Members.length, d.gs2Members.length];
+            xcoord = [d.x1, d.x2];
+            ycoord = [d.y1, d.y2];
+            tableOneObj = d3.select("#tableOne");
+            for (k = 0; k < GeneSetNames.length; k += 1) {
+                tableRowObj = tableOneObj.select("tbody").append("tr");
+                tableRowObj.append("td").append("a")
+                    .attr("href", d.url)
+                    .attr("target", "_blank")
+                    .text(GeneSetNames[k]);
+                tableRowObj.append("td")
+                    .text(numGenes[k]);
+                tableRowObj.append("td")
+                    .text("(" + round(xcoord[k], 3) + "," + round(ycoord[k], 3) + ")");
+            }
+
+            // 2. Member Genes
+            d3.select("#liveTextTwo")
+                .text(d.gsIntersect.length + " genes shown. " + d.gsUnion.length + " unique genes in selected geneset(s)."); // live text
+            tableTwoObj = d3.select("#tableTwo");
             for (k = 0; k < d.gsIntersect.length; k += 1) {
-                panelObj.select("#commonGenes")
-                    .append("li")
+                tableTwoObj.select("tbody").append("tr")
+                    .append("td")
                     .text(d.gsIntersect[k]);
             }
-        
+
             dataObj = d;
             
-            panelObj.select(".msigdbannotation")
+            // 3. Annotation
+            d3.select(".msigdbannotation")
                 .on("click", function () {
                     queryMsigdb(dataObj.gsIntersect);
                 });
 
-            panelObj.select(".davidannotation")
+            d3.select(".davidannotation")
                 .on("click", function () {
                     queryDavid(dataObj.gsIntersect);
                 });
@@ -1017,3 +847,142 @@ function startPlot(event) {
         .call(brush)
         .call(brush.event);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// jQuery ($) functions
+////////////////////////////////////////////////////////////////////////////////
+
+// Function to handle #intUni <select>or changes
+$(document).on('change', '#uniInt', function () {
+    "use strict";
+    var selectedPts = svgObj.selectAll(".selectedNode").data(),
+        i,
+        geneArray = [],
+        geneUnion,
+        geneIntersect,
+        tableTwoObj;
+    
+    for (i = 0; i < selectedPts.length; i += 1) {
+        geneArray[i] = selectedPts[i].MemberGenes;
+    }
+    geneUnion = union_mult(geneArray);
+    
+    if (document.getElementById("uniInt").value === "Union") {
+        // Disable fuzz factor fields
+        $("#fuzzFactor").val(null);
+        $("#fuzzFactor").prop("disabled", true);
+        d3.select("#fuzzWarning").classed("hidden", true); // remove warning
+        
+        // Remove "Member Genes" metadata
+        metadataRemove(2);
+        
+        // Display union
+        // 2. Member Genes
+        d3.select("#liveTextTwo")
+            .text(geneUnion.length + " genes shown. " + geneUnion.length + " unique genes in selected geneset(s)"); // live text
+        tableTwoObj = d3.select("#tableTwo");
+        for (i = 0; i < geneUnion.length; i += 1) {
+            tableTwoObj.select("tbody").append("tr")
+                .append("td")
+                .text(geneUnion[i]);
+        }
+        
+        // 3. Annotation
+        d3.select(".msigdbannotation")
+            .on("click", function () {
+                queryMsigdb(geneUnion);
+            });
+
+        d3.select(".davidannotation")
+            .on("click", function () {
+                queryDavid(geneUnion);
+            });
+    } else { // === "Intersect"
+        // Enable fuzz factor fields
+        $("#fuzzFactor").val(selectedPts.length);
+        $("#fuzzFactor").prop("disabled", false);
+        
+        // Remove "Member Genes" metadata
+        metadataRemove(2);
+        
+        // Display intersect
+        geneIntersect = intersect_mult(geneArray);
+        // 2. Member Genes
+        d3.select("#liveTextTwo")
+            .text(geneIntersect.length + " genes shown. " + geneUnion.length + " unique genes in selected geneset(s)"); // live text
+        tableTwoObj = d3.select("#tableTwo");
+        for (i = 0; i < geneIntersect.length; i += 1) {
+            tableTwoObj.select("tbody").append("tr")
+                .append("td")
+                .text(geneIntersect[i]);
+        }
+        
+        // 3. Annotation
+        d3.select(".msigdbannotation")
+            .on("click", function () {
+                queryMsigdb(geneIntersect);
+            });
+
+        d3.select(".davidannotation")
+            .on("click", function () {
+                queryDavid(geneIntersect);
+            });
+    }
+});
+
+// Function to handle fuzzy intersection calls
+$(document).on('change', '#fuzzFactor', function () {
+    "use strict";
+    var selectedPts = svgObj.selectAll(".selectedNode").data(),
+        i,
+        fuzz = parseInt(document.getElementById("fuzzFactor").value, 10),
+        geneArray = [],
+        geneUnion,
+        geneIntersectFuzzy,
+        tableTwoObj;
+    
+    if (fuzz < 2) {
+        // unhide warning
+        d3.select("#fuzzWarning").classed("hidden", false);
+        d3.select("#fuzzWarningText").text("Warning! Cannot intersect fewer than 2 gene sets.");
+    } else if (fuzz > selectedPts.length) {
+        // unhide warning
+        d3.select("#fuzzWarning").classed("hidden", false);
+        d3.select("#fuzzWarningText").text("Warning! Cannot intersect more gene sets than number selected (" + selectedPts.length + ").");
+    } else {
+        // hide warning
+        d3.select("#fuzzWarning").classed("hidden", true);
+        
+        // Calculate union and fuzzy intersect
+        for (i = 0; i < selectedPts.length; i += 1) {
+            geneArray[i] = selectedPts[i].MemberGenes;
+        }
+        geneUnion = union_mult(geneArray);
+        geneIntersectFuzzy = intersect_fuzzy(geneArray, fuzz);
+        
+        // Remove "Member Genes" metadata
+        metadataRemove(2);
+        
+        // Display fuzzy intersect
+        // 2. Member Genes
+        d3.select("#liveTextTwo")
+            .text(geneIntersectFuzzy.length + " genes shown. " + geneUnion.length + " unique genes in selected geneset(s)"); // live text
+        tableTwoObj = d3.select("#tableTwo");
+        for (i = 0; i < geneIntersectFuzzy.length; i += 1) {
+            tableTwoObj.select("tbody").append("tr")
+                .append("td")
+                .text(geneIntersectFuzzy[i]);
+        }
+        
+        // 3. Annotation
+        d3.select(".msigdbannotation")
+            .on("click", function () {
+                queryMsigdb(geneIntersectFuzzy);
+            });
+
+        d3.select(".davidannotation")
+            .on("click", function () {
+                queryDavid(geneIntersectFuzzy);
+            });
+    }
+});
